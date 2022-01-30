@@ -10,7 +10,7 @@ class Stats():
     def record(self, guesses, win):
         index = guesses if win else -1
         self.outcomes[index] += 1
-        trials += 1
+        self.trials += 1
 
     def report(self):
         count = 0
@@ -21,4 +21,4 @@ class Stats():
         print()
         print("Trials: {}".format(self.trials))
         print("Win Rate: {}%".format((1.0 - (self.outcomes[-1] / self.trials))*100))
-        print("Average guesses to win: {}".format(count * 1.0 / self.trials)
+        print("Average guesses to win: {}".format(count * 1.0 / self.trials))

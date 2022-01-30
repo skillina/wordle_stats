@@ -58,7 +58,9 @@ class WordleEngine:
         if word is None:
             index = random.randint(0, len(self.vocabulary) - 1)
             word = self.vocabulary[index]
-        self.game = WordleGame(word, max_guesses)
+
+        word_formatted = word.strip().upper()
+        self.game = WordleGame(word_formatted, max_guesses)
 
     def guess(self, word):
         if word not in self.vocabulary:

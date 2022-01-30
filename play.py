@@ -3,6 +3,7 @@ import argparse
 from generate_vocab import generate_vocabulary
 from wordle_game import WordleEngine, Presence, GameError
 from interactive_player import InteractivePlayer
+from random_hard_mode import RandomizedHardModePlayer, TrueChaoticPlayer
 from pretty_output import *
 from stats import Stats
 
@@ -19,6 +20,10 @@ class Game():
     def player_select(self):
         if self.args.strategy == "interactive":
             return InteractivePlayer()
+        elif self.args.strategy == "random":
+            return TrueChaoticPlayer(self.vocabulary)
+        elif self.args.strategy == "randomhardmode":
+            return RandomizedHardModePlayer(self.vocabulary)
 
     def load_vocabulary(self):
         if self.args.vocabulary is None:
@@ -36,7 +41,8 @@ class Game():
 
     def play(self):
         for loop_iteration in range(0, self.args.gamelimit):
-            self.engine.new_game(self.args.forceword.strip().upper(), self.args.guesses)
+            print("Wordle {}".format(loop_iteration))
+            self.engine.new_game(self.args.forceword, self.args.guesses)
             self.player.reset_memory()
             win = False
             while self.engine.guesses() < self.args.guesses:
@@ -65,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument("--length", default=5, type=int, help="Word length")
     parser.add_argument("--guesses", default=6, type=int, help="Number of guesses per game")
     parser.add_argument("--forceword", default=None, help="Force a word for the game")
-    parser.add_argument("--gamelimit", default=100, help="Number of games to play")
+    parser.add_argument("--gamelimit", default=100, type=int, help="Number of games to play")
     parser.add_argument("--displaymode", default="full", help="Display mode. Options: none, results, noshare, pretty, full")
     args = parser.parse_args()
 

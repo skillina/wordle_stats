@@ -39,6 +39,7 @@ class PrettyOutput():
             print("Wordle custom: {}/{}".format(numerator, self.guessmax))
             print("\n\n")
 
+        self.guess_history = []
         self.result_history = []
 
     def trigger_redraw(self):

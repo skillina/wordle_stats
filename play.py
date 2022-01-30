@@ -3,6 +3,7 @@ import argparse
 from generate_vocab import generate_vocabulary
 from wordle_game import WordleEngine, Presence, GameError
 from interactive_player import InteractivePlayer
+from pretty_output import *
 
 # Maybe I didn't need another layer of abstraction here, but we have it anyway.
 class Game():
@@ -11,6 +12,7 @@ class Game():
         self.vocabulary = self.load_vocabulary()
         self.player = self.player_select()
         self.engine = WordleEngine(self.vocabulary)
+        self.output = PrettyOutput(self.args.guesses, self.args.displaymode)
 
     def player_select(self):
         if self.args.strategy == "interactive":
@@ -18,7 +20,7 @@ class Game():
 
     def load_vocabulary(self):
         if self.args.vocabulary is None:
-            print("No vocabulary file given... Generating from dictionary!")
+            print("No vocabulary file given... Generating from dictionary!\n")
             return generate_vocabulary(self.args.dictionary, self.args.length, "/dev/null")
 
         vocab = []
@@ -27,42 +29,29 @@ class Game():
                 vocab.append(line.strip().upper())
         return vocab
 
-    # Print the word, complete with full wordle coloring!
-    def display(self, guess, result):
-        colormap = {Presence.NONE: '\033[0m',
-                    Presence.PRESENT: '\033[43m',
-                    Presence.CORRECT: '\033[42m'}
-
-        if len(guess) != len(result):
-            raise RuntimeError("Guess length doesn't match result length")
-        
-        frankenstring = ""
-        for ii in range(0, len(guess)):
-            frankenstring += colormap[result[ii]] + guess[ii]
-        frankenstring += '\033[0m\n'
-        print(frankenstring)
-    
     def win_condition(self, result):
         return result == [Presence.CORRECT] * self.args.length
 
     def play(self):
         for loop_iteration in range(0, self.args.gamelimit):
-            print("New Game!\n")
-            self.engine.new_game(self.args.forceword, self.args.guesses)
-            self.player.reset_past_guesses()
+            self.engine.new_game(self.args.forceword.strip().upper(), self.args.guesses)
+            self.player.reset_memory()
+            win = False
             while self.engine.guesses() < self.args.guesses:
                 try:
                     guess = self.player.guess()
                     result = self.engine.guess(guess)
-                    self.display(guess, result)
-                    if self.win_condition(result):
-                        print("Win!\n")
+
+                    self.output.report_guess(guess, result)
+                    self.player.give_feedback(guess, result)
+                    win = self.win_condition(result)
+                    if  win:
                         break
-                    elif self.engine.guesses() == self.args.guesses:
-                        print("Loss! Word was {}\n".format(self.engine.word()))
                 except GameError as e:
                     print(e)
                     print("\n")
+
+            self.output.end_game(win)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Play Wordle!')
@@ -73,6 +62,7 @@ if __name__ == '__main__':
     parser.add_argument("--guesses", default=6, type=int, help="Number of guesses per game")
     parser.add_argument("--forceword", default=None, help="Force a word for the game")
     parser.add_argument("--gamelimit", default=100, help="Number of games to play")
+    parser.add_argument("--displaymode", default="full", help="Display mode. Options: none, results, noshare, pretty, full")
     args = parser.parse_args()
 
     game = Game(args)

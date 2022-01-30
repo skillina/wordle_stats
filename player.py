@@ -5,7 +5,7 @@ class Player():
         self.warn_on_repeat = warn_on_repeat
 
     # Reset past guess list at the beginning of the game
-    def reset_past_guesses(self):
+    def reset_memory(self):
         self.past_guesses = set()
 
     # Generate a guess, which we have not guessed before
@@ -17,6 +17,9 @@ class Player():
                 return new_guess
             elif self.warn_on_repeat:
                 print("Word already used!\n")
+    
+    def give_feedback(self, guess, result):
+        pass
 
     # Override this in the derived classes to actually generate the guess
     def guess_impl(self):

@@ -21,4 +21,4 @@ class Stats():
         print()
         print("Trials: {}".format(self.trials))
         print("Win Rate: {}%".format((1.0 - (self.outcomes[-1] / self.trials))*100))
-        print("Average guesses to win: {}".format(count * 1.0 / self.trials))
+        print("Average guesses to win: {}".format(count * 1.0 / (self.trials-self.outcomes[-1])))

@@ -4,6 +4,7 @@ from generate_vocab import generate_vocabulary
 from wordle_game import WordleEngine, Presence, GameError
 from interactive_player import InteractivePlayer
 from pretty_output import *
+from stats import Stats
 
 # Maybe I didn't need another layer of abstraction here, but we have it anyway.
 class Game():
@@ -13,6 +14,7 @@ class Game():
         self.player = self.player_select()
         self.engine = WordleEngine(self.vocabulary)
         self.output = PrettyOutput(self.args.guesses, self.args.displaymode)
+        self.stats = Stats(self.args.guesses)
 
     def player_select(self):
         if self.args.strategy == "interactive":
@@ -51,7 +53,9 @@ class Game():
                     print(e)
                     print("\n")
 
+            self.stats.record(self.engine.guesses(), win)
             self.output.end_game(win)
+        self.stats.report()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Play Wordle!')
